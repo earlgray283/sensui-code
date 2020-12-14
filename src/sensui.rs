@@ -118,13 +118,7 @@ impl SensuiMap {
     }
 
     pub fn print(&self) {
-        for i in 0..5 {
-            print!("[");
-            for j in 0..5 {
-                print!("{} ", self.m[i][j]);
-            }
-            println!("]");
-        }
+        
     }
 }
 

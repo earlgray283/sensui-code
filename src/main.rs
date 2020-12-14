@@ -4,6 +4,7 @@ use sensui_code::sensui::{AttackResult, Direction, EnemyAction};
 mod sensui;
 
 const MY_SENSUI_MAP: [&str; 5] = ["..#..", ".....", "#...#", ".....", "..#.."];
+const INF: i32 = 1e9 as i32 + 7;
 
 fn main() {
     let my_map: Vec<Vec<char>> = MY_SENSUI_MAP.iter().map(|s| s.chars().collect()).collect();
@@ -17,7 +18,13 @@ fn main() {
     my_sensui.print();
 
     loop {
-        println!("{:?}", table);
+        for i in 0..5 {
+            print!("[");
+            for j in 0..5 {
+                print!("{} ", table[i][j]);
+            }
+            println!("]");
+        }
 
         match is_my_turn {
             true => {
@@ -30,7 +37,7 @@ fn main() {
 
                 let res = res.unwrap();
                 match res {
-                    AttackResult::HIT => table[target.1][target.0] = std::i32::MAX,
+                    AttackResult::HIT => table[target.1][target.0] = INF,
                     AttackResult::DEAD => {
                         table[target.1][target.0] = -1;
                     }
@@ -105,13 +112,13 @@ fn set_target(my_sensui: &SensuiMap, table: &Vec<Vec<i32>>) -> (usize, usize) {
             }
         }
     }
-    
+
     let mut max = 0;
     let mut target = (5, 5);
     for t in list {
         let mut cnt = 0;
-        for i in t.1.checked_sub(1).unwrap_or_default()..(t.1+2).min(5) {
-            for j in t.0.checked_sub(1).unwrap_or_default()..(t.0+2).min(5) {
+        for i in t.1.checked_sub(1).unwrap_or_default()..(t.1 + 2).min(5) {
+            for j in t.0.checked_sub(1).unwrap_or_default()..(t.0 + 2).min(5) {
                 if table[i][j] == -1 {
                     cnt += 1;
                 }
