@@ -1,4 +1,8 @@
+// 基本的に授業の潜水艦ゲームの仕様に準じています。
+// 潜水艦ゲーム内での最低限の操作しか実装していません(最低限で200行ってそれマジ？)
+
 use text_io::read;
+
 pub enum AttackResult {
     HIT,
     RAGE,
@@ -21,7 +25,6 @@ pub enum EnemyAction {
 pub struct SensuiMap {
     pub m: Vec<Vec<char>>,
     pub hp_table: Vec<Vec<i32>>,
-    e: Vec<Vec<char>>,
 }
 
 impl SensuiMap {
@@ -48,54 +51,50 @@ impl SensuiMap {
 
         SensuiMap {
             m,
-            e: vec![vec!['*', '*', '*', '*', '*']; 5],
-            hp_table
+            hp_table,
         }
     }
 
     pub fn new(m: Vec<Vec<char>>) -> SensuiMap {
         SensuiMap {
             m,
-            e: vec![vec!['*', '*', '*', '*', '*']; 5],
             hp_table: vec![vec![3, 3, 3, 3, 3]; 5],
         }
     }
 
-    // だめ
-    pub fn move_sensui(&mut self, now: (usize, usize), next: (usize, usize)) -> bool {
-        if now.1.checked_sub(1).is_none()
-            || now.0.checked_sub(1).is_none()
-            || next.0.checked_sub(1).is_none()
-            || next.1.checked_sub(1).is_none()
-            || now.1 >= 5
-            || now.0 >= 5
-            || next.1 >= 5
-            || next.0 >= 5
-        {
-            return false;
+    // (A, 1) か (1, A) かはっきりしないので、それは後から
+    pub fn move_sensui(&mut self, now: (usize, usize), next: (usize, usize)) -> Result<(), String> {
+        if now.1 >= 5 || now.0 >= 5 {
+            return Err("now is out of range".to_string());
+        }
+        if next.1 >= 5 || next.0 >= 5 {
+            return Err("next is out of range".to_string());
         }
 
-        if self.m[now.1][now.0] != '#' || self.m[next.1][next.0] == '#' {
-            return false;
+        if self.m[now.1][now.0] == '.' {
+            return Err(format!("there is no submarine at ({}, {})", now.0, now.1));
+        }
+        if self.m[next.1][next.0] == '#' {
+            return Err(format!("there is already a submarine at ({}, {})", next.0, now.1));
         }
 
         self.m[now.1][now.0] = '.';
         self.m[next.1][next.0] = '#';
 
-        true
+        Ok(())
     }
 
     pub fn attack(&self, target: (usize, usize)) -> Result<AttackResult, String> {
         if self.m[target.1][target.0] == '#' {
-            return Err(format!("({}, {}) == #", target.0, target.1));
+            return Err(format!("There is a submarine at ({}, {}) in your map", target.0, target.1));
         }
 
-        println!("attack to ({}, {})", target.0, target.1);
+        println!("attack to ({}, {})!", target.0 , target.1);
 
-        Ok(get_attack_result())
+        Ok(get_attack_response())
     }
 
-    pub fn check_attack(&mut self, target: (usize, usize)) -> AttackResult {
+    pub fn attack_response(&mut self, target: (usize, usize)) -> AttackResult {
         if self.m[target.1][target.0] == '#' {
             self.hp_table[target.1][target.0] -= 1;
             if self.hp_table[target.1][target.0] == 0 {
@@ -104,9 +103,9 @@ impl SensuiMap {
             return AttackResult::HIT;
         }
 
-        let range_y = target.1.checked_sub(1).unwrap_or_default()..(target.1+2).min(5);
+        let range_y = target.1.checked_sub(1).unwrap_or_default()..(target.1 + 2).min(5);
         for i in range_y {
-            let range_x = target.0.checked_sub(1).unwrap_or_default()..(target.0+2).min(5);
+            let range_x = target.0.checked_sub(1).unwrap_or_default()..(target.0 + 2).min(5);
             for j in range_x {
                 if self.m[i][j] == '#' {
                     return AttackResult::RAGE;
@@ -117,13 +116,18 @@ impl SensuiMap {
         AttackResult::NONE
     }
 
-    pub fn print(&self) {
-        
+    pub fn print_all(&self) {
+        for i in 0..5 {
+            for j in 0..5 {
+                print!("{} ", self.m[i][j]);
+            }
+            println!();
+        }
+        println!();
     }
 }
 
-
-fn get_attack_result() -> AttackResult {
+fn get_attack_response() -> AttackResult {
     loop {
         let s: String = read!();
 
@@ -132,7 +136,7 @@ fn get_attack_result() -> AttackResult {
             "rage" => return AttackResult::RAGE,
             "dead" => return AttackResult::DEAD,
             "none" => return AttackResult::NONE,
-            _ => eprintln!("please input hit, rage or dead"),
+            _ => eprintln!("please input hit, rage, dead or none"),
         }
     }
 }
@@ -145,7 +149,8 @@ pub fn get_enemy_action() -> EnemyAction {
         let tokens: Vec<&str> = s.split(' ').collect();
 
         match tokens[0] {
-            "1" => { // 1 x y
+            "1" => {
+                // 1 x y
                 if tokens.len() == 3 {
                     let x = tokens[1].parse::<usize>();
                     if let Err(e) = x {
@@ -164,7 +169,8 @@ pub fn get_enemy_action() -> EnemyAction {
                     return EnemyAction::ATTACK { x, y };
                 }
             }
-            "2" => { // 2 d n
+            "2" => {
+                // 2 d n
                 if tokens.len() == 3 {
                     let d = tokens[1];
                     let n = tokens[2].parse::<usize>();
@@ -178,25 +184,25 @@ pub fn get_enemy_action() -> EnemyAction {
                         "north" => {
                             return EnemyAction::MOVE {
                                 d: Direction::NORTH,
-                                n: n,
+                                n,
                             }
                         }
                         "south" => {
                             return EnemyAction::MOVE {
                                 d: Direction::SOUTH,
-                                n: n,
+                                n,
                             }
                         }
                         "west" => {
                             return EnemyAction::MOVE {
                                 d: Direction::WEST,
-                                n: n,
+                                n,
                             }
                         }
                         "east" => {
                             return EnemyAction::MOVE {
                                 d: Direction::EAST,
-                                n: n,
+                                n,
                             }
                         }
                         _ => eprintln!("please input north, south, west or east"),

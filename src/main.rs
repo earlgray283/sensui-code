@@ -6,6 +6,22 @@ mod sensui;
 const MY_SENSUI_MAP: [&str; 5] = ["..#..", ".....", "#...#", ".....", "..#.."];
 const INF: i32 = 1e9 as i32 + 7;
 
+pub trait Print<T> {
+    fn print_all(&self);
+}
+impl<T: std::fmt::Display> Print<T> for Vec<Vec<T>> {
+    fn print_all(&self) {
+        for i in 0..5 {
+            print!("[");
+            for j in 0..5 {
+                print!("{} ", self[i][j]);
+            }
+            println!("]");
+        }
+        println!();
+    }
+}
+
 fn main() {
     let my_map: Vec<Vec<char>> = MY_SENSUI_MAP.iter().map(|s| s.chars().collect()).collect();
     let mut my_sensui = SensuiMap::new(my_map);
@@ -15,16 +31,10 @@ fn main() {
 
     let mut target = (2, 2);
 
-    my_sensui.print();
+    my_sensui.print_all();
 
     loop {
-        for i in 0..5 {
-            print!("[");
-            for j in 0..5 {
-                print!("{} ", table[i][j]);
-            }
-            println!("]");
-        }
+        table.print_all();
 
         match is_my_turn {
             true => {
@@ -78,7 +88,7 @@ fn main() {
                 match action {
                     EnemyAction::ATTACK { x, y } => {
                         table[y][x] = -1;
-                        match my_sensui.check_attack((x, y)) {
+                        match my_sensui.attack_response((x, y)) {
                             AttackResult::HIT => {
                                 println!("hit");
                                 my_sensui.hp_table[y][x] -= 1;
