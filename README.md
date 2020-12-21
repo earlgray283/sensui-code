@@ -5,7 +5,7 @@
 + Rust(1.48.0)
 
 ## Install
-### 1. Rust のインストール
+### 1. Rust のインストール(ない人だけ)
 ```console
 $ sudo apt install curl
 $ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
@@ -23,7 +23,7 @@ $ source $HOME/.cargo/env
 ### 2. sensui-code の clone
 勉強会参加した人は公開鍵を置いているはずなので SSH でやりましょう。
 ```console
-$ cd {clone したいディレクトリ}
+$ cd {clone 先のディレクトリ}
 $ git clone git@github.com:earlgray283/sensui-code.git
 $ cd sensui-code
 ```
