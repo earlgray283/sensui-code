@@ -61,10 +61,10 @@ fn main() {
                     }
                     AttackResult::RAGE => {
                         let range_y =
-                            target.1.checked_sub(1).unwrap_or_default()..=(target.1 + 1).min(5);
+                            target.1.checked_sub(1).unwrap_or_default()..=(target.1 + 1).min(4);
                         for i in range_y {
                             let range_x =
-                                target.0.checked_sub(1).unwrap_or_default()..=(target.0 + 1).min(5);
+                                target.0.checked_sub(1).unwrap_or_default()..=(target.0 + 1).min(4);
                             for j in range_x {
                                 table[i][j] = if table[i][j] == -1 {
                                     1
