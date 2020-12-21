@@ -57,22 +57,14 @@ fn main() {
                         table[target.1][target.0] = -1;
                     }
                     AttackResult::NONE => {
-                        let range_y =
-                            target.1.checked_sub(1).unwrap_or_default()..(target.1 + 1).min(5);
-                        for i in range_y {
-                            let range_x =
-                                target.0.checked_sub(1).unwrap_or_default()..(target.0 + 1).min(5);
-                            for j in range_x {
-                                table[i][j] = 0;
-                            }
-                        }
+                        table[target.1][target.0] = 0;
                     }
                     AttackResult::RAGE => {
                         let range_y =
-                            target.1.checked_sub(1).unwrap_or_default()..(target.1 + 2).min(5);
+                            target.1.checked_sub(1).unwrap_or_default()..=(target.1 + 1).min(5);
                         for i in range_y {
                             let range_x =
-                                target.0.checked_sub(1).unwrap_or_default()..(target.0 + 2).min(5);
+                                target.0.checked_sub(1).unwrap_or_default()..=(target.0 + 1).min(5);
                             for j in range_x {
                                 table[i][j] = if table[i][j] == -1 {
                                     1
@@ -115,5 +107,3 @@ fn main() {
         is_my_turn = !is_my_turn;
     }
 }
-
-

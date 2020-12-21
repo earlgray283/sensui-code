@@ -103,9 +103,9 @@ impl SensuiMap {
             return AttackResult::HIT;
         }
 
-        let range_y = target.1.checked_sub(1).unwrap_or_default()..(target.1 + 2).min(5);
+        let range_y = target.1.checked_sub(1).unwrap_or_default()..=(target.1 + 1).min(5);
         for i in range_y {
-            let range_x = target.0.checked_sub(1).unwrap_or_default()..(target.0 + 2).min(5);
+            let range_x = target.0.checked_sub(1).unwrap_or_default()..=(target.0 + 1).min(5);
             for j in range_x {
                 if self.m[i][j] == '#' {
                     return AttackResult::RAGE;
