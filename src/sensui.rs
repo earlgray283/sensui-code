@@ -6,9 +6,9 @@ use text_io::read;
 
 // 自分の攻撃に対する相手の反応() 内は潜水艦の id
 pub enum AttackResult {
-    HIT,
-    RAGE,
-    DEAD,
+    HIT((usize, usize)),
+    RAGE((usize, usize)),
+    DEAD((usize, usize)),
     NONE,
 }
 
@@ -20,6 +20,7 @@ pub enum EnemyAttackResult {
     NONE,
 }
 
+#[derive(Clone, Copy)]
 pub enum Direction {
     NORTH,
     SOUTH,
@@ -34,7 +35,7 @@ pub enum EnemyAction {
 
 pub struct SensuiMap {
     pub m: Vec<Vec<char>>,
-    pub hp_table: Vec<Vec<i32>>,
+    /// (usize, usize) = (x, y)
     pub id_map: HashMap<(usize, usize), usize>,
     pub sensuis: Vec<SensuiData>,
 }
@@ -110,7 +111,6 @@ impl SensuiMap {
 
         SensuiMap {
             m,
-            hp_table: vec![vec![3, 3, 3, 3, 3]; 5],
             sensuis,
             id_map,
         }
@@ -118,12 +118,27 @@ impl SensuiMap {
 
     pub fn move_sensui(&mut self, id: usize, direction: Direction, n: usize) -> Result<(), String> {
         let n = n as i32;
-        let dxy: (i32, i32) = match direction {
-            Direction::EAST => (n, 0),
-            Direction::NORTH => (0, -n),
-            Direction::SOUTH => (0, n),
-            Direction::WEST => (-n, 0),
-        };
+        let dxy = direction_to_dxy(direction, n);
+
+        println!(
+            "move {} squares {}!",
+            n,
+            match direction {
+                Direction::EAST => "east",
+                Direction::NORTH => "north",
+                Direction::SOUTH => "south",
+                Direction::WEST => "west",
+            }
+        );
+
+        self.m[self.sensuis[id].pos.1][self.sensuis[id].pos.0] = '.';
+
+        let id_ = self.id_map[&self.sensuis[id].pos];
+        self.id_map
+            .remove(&self.sensuis[id].pos)
+            .expect("map remove error");
+        
+        dbg!(self.sensuis[id].pos);
 
         if dxy.0.is_negative() {
             self.sensuis[id].pos.0 -= dxy.0.abs() as usize;
@@ -136,7 +151,31 @@ impl SensuiMap {
             self.sensuis[id].pos.1 += dxy.1.abs() as usize;
         }
 
+        dbg!("new pos", self.sensuis[id].pos);
+        self.m[self.sensuis[id].pos.1][self.sensuis[id].pos.0] = '#';
+        self.id_map
+            .insert(self.sensuis[id].pos, id_);
+
+        // todo
+
         Ok(())
+    }
+
+    pub fn gen_attackable(&self) -> Vec<Vec<bool>> {
+        let mut attackable = vec![vec![false; 5]; 5];
+        for sensui in &self.sensuis {
+            for i in sensui.pos.1.checked_sub(1).unwrap_or_default()..=(sensui.pos.1 + 1).min(4) {
+                for j in sensui.pos.0.checked_sub(1).unwrap_or_default()..=(sensui.pos.0 + 1).min(4)
+                {
+                    if sensui.pos.1 == i && sensui.pos.0 == j {
+                        continue;
+                    }
+                    attackable[i][j] = true;
+                }
+            }
+        }
+
+        attackable
     }
 
     pub fn attack(&self, target: (usize, usize)) -> Result<AttackResult, String> {
@@ -149,14 +188,20 @@ impl SensuiMap {
 
         println!("attack to ({}, {})!", target.0, target.1);
 
-        Ok(get_attack_response())
+        Ok(get_attack_response(target))
     }
 
     pub fn attack_response(&mut self, target: (usize, usize)) -> EnemyAttackResult {
+        dbg!(&self.id_map);
+        println!();
         if self.m[target.1][target.0] == '#' {
-            self.hp_table[target.1][target.0] -= 1;
-            if self.hp_table[target.1][target.0] == 0 {
-                return EnemyAttackResult::DEAD(self.id_map[&target]);
+            let id = self.id_map[&target];
+            self.sensuis[id].hp -= 1;
+            if self.sensuis[id].hp == 0 {
+                self.sensuis[id].status = AttackResult::DEAD(target);
+                self.id_map.remove(&target);
+                self.m[target.1][target.0] = '.';
+                return EnemyAttackResult::DEAD(id);
             }
             return EnemyAttackResult::HIT(self.id_map[&target]);
         }
@@ -166,7 +211,7 @@ impl SensuiMap {
             let range_x = target.0.checked_sub(1).unwrap_or_default()..=(target.0 + 1).min(4);
             for j in range_x {
                 if self.m[i][j] == '#' {
-                    return EnemyAttackResult::RAGE(self.id_map[&(j, i)]);
+                    return EnemyAttackResult::RAGE(self.id_map[&target]);
                 }
             }
         }
@@ -206,15 +251,15 @@ impl SensuiMap {
     }
 }
 
-fn get_attack_response() -> AttackResult {
+fn get_attack_response(target: (usize, usize)) -> AttackResult {
     loop {
         println!("input attack result: (hit / rage / dead / none) > ");
         let s: String = read!();
 
         match &*s {
-            "hit" => return AttackResult::HIT,
-            "rage" => return AttackResult::RAGE,
-            "dead" => return AttackResult::DEAD,
+            "hit" => return AttackResult::HIT(target),
+            "rage" => return AttackResult::RAGE(target),
+            "dead" => return AttackResult::DEAD(target),
             "none" => return AttackResult::NONE,
             _ => eprintln!("invalid result"),
         }
@@ -291,5 +336,14 @@ pub fn get_enemy_action() -> EnemyAction {
             }
             _ => eprintln!("invalid query"),
         }
+    }
+}
+
+pub fn direction_to_dxy(direction: Direction, n: i32) -> (i32, i32) {
+    match direction {
+        Direction::EAST => (n, 0),
+        Direction::NORTH => (0, -n),
+        Direction::SOUTH => (0, n),
+        Direction::WEST => (-n, 0),
     }
 }
