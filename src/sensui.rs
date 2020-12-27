@@ -1,12 +1,22 @@
 // 基本的に授業の潜水艦ゲームの仕様に準じています。
 // 潜水艦ゲーム内での最低限の操作しか実装していません(最低限で200行ってそれマジ？)
 
+use std::collections::HashMap;
 use text_io::read;
 
+// 自分の攻撃に対する相手の反応() 内は潜水艦の id
 pub enum AttackResult {
     HIT,
     RAGE,
     DEAD,
+    NONE,
+}
+
+// enemy の攻撃に対する反応
+pub enum EnemyAttackResult {
+    HIT(usize),
+    RAGE(usize),
+    DEAD(usize),
     NONE,
 }
 
@@ -25,11 +35,23 @@ pub enum EnemyAction {
 pub struct SensuiMap {
     pub m: Vec<Vec<char>>,
     pub hp_table: Vec<Vec<i32>>,
+    pub id_map: HashMap<(usize, usize), usize>,
+    pub sensuis: Vec<SensuiData>,
+}
+
+pub struct SensuiData {
+    pub id: usize,
+    pub hp: usize,
+    pub pos: (usize, usize),
+    pub status: AttackResult,
 }
 
 impl SensuiMap {
+    /*
     pub fn new_rand() -> SensuiMap {
         let mut m = vec![vec!['.', '.', '.', '.', '.']; 5];
+
+        let mut pos_list = Vec::new();
         for _i in 0..5 {
             let mut x = rand::random::<usize>() % 5;
             let mut y = rand::random::<usize>() % 5;
@@ -38,6 +60,7 @@ impl SensuiMap {
                 y = rand::random::<usize>() % 5;
             }
             m[y][x] = '#';
+            pos_list.push((y, x));
         }
 
         let mut hp_table = vec![vec![-1, -1, -1, -1, -1]; 5];
@@ -52,55 +75,90 @@ impl SensuiMap {
         SensuiMap {
             m,
             hp_table,
+            sensuis: (0..4).map(|i| SensuiData {
+                id: i,
+                hp: 3,
+                pos: pos_list[i],
+                status: AttackResult::NONE,
+            }).collect(),
         }
     }
+    */
 
     pub fn new(m: Vec<Vec<char>>) -> SensuiMap {
+        let mut pos_list = Vec::new();
+        for i in 0..5 {
+            for j in 0..5 {
+                if m[i][j] == '#' {
+                    pos_list.push((j, i));
+                }
+            }
+        }
+
+        let mut id_map: HashMap<(usize, usize), usize> = HashMap::new();
+        let sensuis = (0..4)
+            .map(|i| SensuiData {
+                id: i,
+                hp: 3,
+                pos: pos_list[i],
+                status: AttackResult::NONE,
+            })
+            .collect::<Vec<SensuiData>>();
+        for sensui in &sensuis {
+            id_map.insert(sensui.pos, sensui.id);
+        }
+
         SensuiMap {
             m,
             hp_table: vec![vec![3, 3, 3, 3, 3]; 5],
+            sensuis,
+            id_map,
         }
     }
 
-    // (A, 1) か (1, A) かはっきりしないので、それは後から
-    pub fn move_sensui(&mut self, now: (usize, usize), next: (usize, usize)) -> Result<(), String> {
-        if now.1 >= 5 || now.0 >= 5 {
-            return Err("now is out of range".to_string());
-        }
-        if next.1 >= 5 || next.0 >= 5 {
-            return Err("next is out of range".to_string());
-        }
+    pub fn move_sensui(&mut self, id: usize, direction: Direction, n: usize) -> Result<(), String> {
+        let n = n as i32;
+        let dxy: (i32, i32) = match direction {
+            Direction::EAST => (n, 0),
+            Direction::NORTH => (0, -n),
+            Direction::SOUTH => (0, n),
+            Direction::WEST => (-n, 0),
+        };
 
-        if self.m[now.1][now.0] == '.' {
-            return Err(format!("there is no submarine at ({}, {})", now.0, now.1));
+        if dxy.0.is_negative() {
+            self.sensuis[id].pos.0 -= dxy.0.abs() as usize;
+        } else {
+            self.sensuis[id].pos.0 += dxy.0.abs() as usize;
         }
-        if self.m[next.1][next.0] == '#' {
-            return Err(format!("there is already a submarine at ({}, {})", next.0, now.1));
+        if dxy.1.is_negative() {
+            self.sensuis[id].pos.1 -= dxy.1.abs() as usize;
+        } else {
+            self.sensuis[id].pos.1 += dxy.1.abs() as usize;
         }
-
-        self.m[now.1][now.0] = '.';
-        self.m[next.1][next.0] = '#';
 
         Ok(())
     }
 
     pub fn attack(&self, target: (usize, usize)) -> Result<AttackResult, String> {
         if self.m[target.1][target.0] == '#' {
-            return Err(format!("There is a submarine at ({}, {}) in your map", target.0, target.1));
+            return Err(format!(
+                "There is a submarine at ({}, {}) in your map",
+                target.0, target.1
+            ));
         }
 
-        println!("attack to ({}, {})!", target.0 , target.1);
+        println!("attack to ({}, {})!", target.0, target.1);
 
         Ok(get_attack_response())
     }
 
-    pub fn attack_response(&mut self, target: (usize, usize)) -> AttackResult {
+    pub fn attack_response(&mut self, target: (usize, usize)) -> EnemyAttackResult {
         if self.m[target.1][target.0] == '#' {
             self.hp_table[target.1][target.0] -= 1;
             if self.hp_table[target.1][target.0] == 0 {
-                return AttackResult::DEAD;
+                return EnemyAttackResult::DEAD(self.id_map[&target]);
             }
-            return AttackResult::HIT;
+            return EnemyAttackResult::HIT(self.id_map[&target]);
         }
 
         let range_y = target.1.checked_sub(1).unwrap_or_default()..=(target.1 + 1).min(4);
@@ -108,27 +166,49 @@ impl SensuiMap {
             let range_x = target.0.checked_sub(1).unwrap_or_default()..=(target.0 + 1).min(4);
             for j in range_x {
                 if self.m[i][j] == '#' {
-                    return AttackResult::RAGE;
+                    return EnemyAttackResult::RAGE(self.id_map[&(j, i)]);
                 }
             }
         }
 
-        AttackResult::NONE
+        EnemyAttackResult::NONE
     }
 
-    pub fn print_all(&self) {
+    // print decolated sensui-map
+    pub fn print_deco(&self) {
+        let mut v = Vec::new();
+
+        let mut max = 0;
         for i in 0..5 {
+            let mut buf = String::new();
+            buf.push_str("| ");
             for j in 0..5 {
-                print!("{} ", self.m[i][j]);
+                buf.push_str(&format!("{} ", self.m[i][j]));
             }
-            println!();
+            buf.push_str("|\n");
+            max = max.max(buf.len() - 3);
+            v.push(buf);
         }
-        println!();
+
+        print!("+");
+        for _ in 0..max {
+            print!("-");
+        }
+        println!("+");
+        for s in &v {
+            print!("{}", s);
+        }
+        print!("+");
+        for _ in 0..max {
+            print!("-");
+        }
+        println!("+");
     }
 }
 
 fn get_attack_response() -> AttackResult {
     loop {
+        println!("input attack result: (hit / rage / dead / none) > ");
         let s: String = read!();
 
         match &*s {
@@ -136,14 +216,14 @@ fn get_attack_response() -> AttackResult {
             "rage" => return AttackResult::RAGE,
             "dead" => return AttackResult::DEAD,
             "none" => return AttackResult::NONE,
-            _ => eprintln!("please input hit, rage, dead or none"),
+            _ => eprintln!("invalid result"),
         }
     }
 }
 
 pub fn get_enemy_action() -> EnemyAction {
     loop {
-        println!("input query > ");
+        println!("input query: (1 x y / 2 d n) > ");
 
         let s: String = read!("{}\n");
         let tokens: Vec<&str> = s.split(' ').collect();

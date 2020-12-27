@@ -24,7 +24,6 @@ pub fn base_search(my_sensui: &SensuiMap, table: &Vec<Vec<i32>>) -> (usize, usiz
             }
         }
         if cnt > max {
-            println!("target: ({}, {}), cnt: {}", t.0, t.1, cnt);
             max = cnt;
             target = t;
         }
