@@ -1,5 +1,6 @@
 pub trait Print<T> {
     fn print_deco(&self);
+    fn print(&self);
 }
 impl<T: std::fmt::Display> Print<T> for Vec<Vec<T>> {
     // print decolated Vec<Vec<T>>
@@ -31,5 +32,14 @@ impl<T: std::fmt::Display> Print<T> for Vec<Vec<T>> {
             print!("-");
         }
         println!("+");
+    }
+
+    fn print(&self) {
+        for i in 0..5 {
+            for j in 0..5 {
+                print!("{} ", self[i][j]);
+            }
+            println!();
+        }
     }
 }
