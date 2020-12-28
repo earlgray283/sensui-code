@@ -199,7 +199,7 @@ impl SensuiMap {
         for i in target.1.checked_sub(1).unwrap_or_default()..=(target.1 + 1).min(4) {
             for j in target.0.checked_sub(1).unwrap_or_default()..=(target.0 + 1).min(4) {
                 if self.m[i][j] == '#' {
-                    return EnemyAttackResult::RAGE(self.id_map[&target]);
+                    return EnemyAttackResult::RAGE(self.id_map[&(j, i)]);
                 }
             }
         }
