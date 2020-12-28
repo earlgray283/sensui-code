@@ -109,11 +109,7 @@ impl SensuiMap {
             id_map.insert(sensui.pos, sensui.id);
         }
 
-        SensuiMap {
-            m,
-            sensuis,
-            id_map,
-        }
+        SensuiMap { m, sensuis, id_map }
     }
 
     pub fn move_sensui(&mut self, id: usize, direction: Direction, n: usize) -> Result<(), String> {
@@ -121,7 +117,7 @@ impl SensuiMap {
         let dxy = direction_to_dxy(direction, n);
 
         println!(
-            "move {} squares {}!",
+            "【Action】move {} squares {}!",
             n,
             match direction {
                 Direction::EAST => "east",
@@ -136,9 +132,7 @@ impl SensuiMap {
         let id_ = self.id_map[&self.sensuis[id].pos];
         self.id_map
             .remove(&self.sensuis[id].pos)
-            .expect("map remove error");
-        
-        dbg!(self.sensuis[id].pos);
+            .expect("【Error】map remove error");
 
         if dxy.0.is_negative() {
             self.sensuis[id].pos.0 -= dxy.0.abs() as usize;
@@ -151,10 +145,8 @@ impl SensuiMap {
             self.sensuis[id].pos.1 += dxy.1.abs() as usize;
         }
 
-        dbg!("new pos", self.sensuis[id].pos);
         self.m[self.sensuis[id].pos.1][self.sensuis[id].pos.0] = '#';
-        self.id_map
-            .insert(self.sensuis[id].pos, id_);
+        self.id_map.insert(self.sensuis[id].pos, id_);
 
         // todo
 
@@ -181,19 +173,17 @@ impl SensuiMap {
     pub fn attack(&self, target: (usize, usize)) -> Result<AttackResult, String> {
         if self.m[target.1][target.0] == '#' {
             return Err(format!(
-                "There is a submarine at ({}, {}) in your map",
+                "【Error】There is a submarine at ({}, {}) in your map",
                 target.0, target.1
             ));
         }
 
-        println!("attack to ({}, {})!", target.0, target.1);
+        println!("【Action】attack to ({}, {})!", target.0, target.1);
 
         Ok(get_attack_response(target))
     }
 
     pub fn attack_response(&mut self, target: (usize, usize)) -> EnemyAttackResult {
-        dbg!(&self.id_map);
-        println!();
         if self.m[target.1][target.0] == '#' {
             let id = self.id_map[&target];
             self.sensuis[id].hp -= 1;
@@ -206,10 +196,8 @@ impl SensuiMap {
             return EnemyAttackResult::HIT(self.id_map[&target]);
         }
 
-        let range_y = target.1.checked_sub(1).unwrap_or_default()..=(target.1 + 1).min(4);
-        for i in range_y {
-            let range_x = target.0.checked_sub(1).unwrap_or_default()..=(target.0 + 1).min(4);
-            for j in range_x {
+        for i in target.1.checked_sub(1).unwrap_or_default()..=(target.1 + 1).min(4) {
+            for j in target.0.checked_sub(1).unwrap_or_default()..=(target.0 + 1).min(4) {
                 if self.m[i][j] == '#' {
                     return EnemyAttackResult::RAGE(self.id_map[&target]);
                 }
@@ -253,7 +241,7 @@ impl SensuiMap {
 
 fn get_attack_response(target: (usize, usize)) -> AttackResult {
     loop {
-        println!("input attack result: (hit / rage / dead / none) > ");
+        println!("【Prompt】input attack result: (hit / rage / dead / none) > ");
         let s: String = read!();
 
         match &*s {
@@ -261,14 +249,14 @@ fn get_attack_response(target: (usize, usize)) -> AttackResult {
             "rage" => return AttackResult::RAGE(target),
             "dead" => return AttackResult::DEAD(target),
             "none" => return AttackResult::NONE,
-            _ => eprintln!("invalid result"),
+            _ => eprintln!("【Error】invalid result"),
         }
     }
 }
 
 pub fn get_enemy_action() -> EnemyAction {
     loop {
-        println!("input query: (1 x y / 2 d n) > ");
+        println!("【Prompt】input query: (1 x y / 2 d n) > ");
 
         let s: String = read!("{}\n");
         let tokens: Vec<&str> = s.split(' ').collect();
@@ -304,37 +292,24 @@ pub fn get_enemy_action() -> EnemyAction {
                         continue;
                     }
                     let n = n.unwrap();
-
-                    match d {
-                        "north" => {
-                            return EnemyAction::MOVE {
-                                d: Direction::NORTH,
-                                n,
-                            }
-                        }
-                        "south" => {
-                            return EnemyAction::MOVE {
-                                d: Direction::SOUTH,
-                                n,
-                            }
-                        }
-                        "west" => {
-                            return EnemyAction::MOVE {
-                                d: Direction::WEST,
-                                n,
-                            }
-                        }
-                        "east" => {
-                            return EnemyAction::MOVE {
-                                d: Direction::EAST,
-                                n,
-                            }
-                        }
-                        _ => eprintln!("please input north, south, west or east"),
+                    if d != "north" && d != "south" && d != "west" && d != "east" {
+                        eprintln!("【Error】invalid direction");
+                        continue;
                     }
+
+                    return EnemyAction::MOVE {
+                        d: match d {
+                            "north" => Direction::NORTH,
+                            "south" => Direction::SOUTH,
+                            "west" => Direction::WEST,
+                            "east" => Direction::EAST,
+                            _ => Direction::NORTH,
+                        },
+                        n,
+                    };
                 }
             }
-            _ => eprintln!("invalid query"),
+            _ => eprintln!("【Error】invalid query"),
         }
     }
 }
