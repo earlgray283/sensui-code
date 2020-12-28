@@ -20,7 +20,7 @@ pub enum EnemyAttackResult {
     NONE,
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, Debug)]
 pub enum Direction {
     NORTH,
     SOUTH,

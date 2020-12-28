@@ -1,3 +1,5 @@
+// Tuple の中身は (x, y)！！！！！！！！！！！！！！！！！！！！！！１
+
 mod operation;
 mod print;
 mod sensui;
@@ -39,7 +41,6 @@ fn main() {
                     // move
                     EnemyAttackResult::HIT(id) | EnemyAttackResult::RAGE(id) => {
                         // todo
-                        dbg!(id);
                         let next = operation::mov(id, &my_sensui, &enemy_attacked_table);
                         my_sensui
                             .move_sensui(id, next.0, next.1)
@@ -50,7 +51,7 @@ fn main() {
                     _ => {
                         let mut res: Result<AttackResult, String>;
                         loop {
-                            res = my_sensui.attack((target.1, target.0));
+                            res = my_sensui.attack((target.0, target.1));
                             if let Err(e) = res {
                                 println!("{}", e);
                                 continue;
@@ -158,6 +159,8 @@ fn set_next(dxy_: (i32, i32), t: (usize, usize)) -> (Option<usize>, Option<usize
             Some(next.1.unwrap() + dxy_.1.abs() as usize)
         }
     }
+
+    println!("next: ({}, {})", next.0.unwrap(), next.1.unwrap());
 
     next
 }
