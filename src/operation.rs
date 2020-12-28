@@ -62,7 +62,7 @@ pub fn mov(id: usize, my_sensui: &SensuiMap, table: &Vec<Vec<i32>>) -> (Directio
 
     let mut ans: (Direction, usize) = (Direction::NORTH, 1);
     let mut _max = -1;
-    'L: for direction in &v {
+    for direction in &v {
         for i in 1..=2 {
             let dxy = sensui::direction_to_dxy(*direction, i);
             let next = super::set_next(dxy, my_sensui.sensuis[id].pos);
@@ -78,8 +78,6 @@ pub fn mov(id: usize, my_sensui: &SensuiMap, table: &Vec<Vec<i32>>) -> (Directio
                 _max = table[next.1][next.0];
                 ans = (*direction, i as usize);
             }
-
-            break 'L;
         }
     }
 
