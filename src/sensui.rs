@@ -191,19 +191,23 @@ impl SensuiMap {
                 self.sensuis[id].status = AttackResult::DEAD(target);
                 self.id_map.remove(&target);
                 self.m[target.1][target.0] = '.';
+                println!("【Attack Response】Dead");
                 return EnemyAttackResult::DEAD(id);
             }
+            println!("【Attack Response】Hit");
             return EnemyAttackResult::HIT(self.id_map[&target]);
         }
 
         for i in target.1.checked_sub(1).unwrap_or_default()..=(target.1 + 1).min(4) {
             for j in target.0.checked_sub(1).unwrap_or_default()..=(target.0 + 1).min(4) {
                 if self.m[i][j] == '#' {
+                    println!("【Attack Response】Rage");
                     return EnemyAttackResult::RAGE(self.id_map[&(j, i)]);
                 }
             }
         }
 
+        println!("【Attack Response】None");
         EnemyAttackResult::NONE
     }
 

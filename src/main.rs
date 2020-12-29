@@ -1,4 +1,47 @@
-// Tuple の中身は (x, y)！！！！！！！！！！！！！！！！！！！！！！１
+/*
+                      ■                                     
+                      ■                 ■■■■■               
+ ■                    ■                ■  ■  ■■             
+■■■■  ■   ■■  ■ ■■■   ■    ■■■■       ■   ■   ■             
+ ■    ■   ■■  ■■  ■■  ■   ■■  ■      ■■   ■    ■            
+ ■    ■   ■■  ■    ■  ■   ■   ■■     ■   ■     ■            
+ ■    ■   ■■  ■    ■  ■   ■■■■■■     ■   ■    ■■            
+ ■    ■   ■■  ■    ■  ■   ■           ■ ■     ■             
+ ■■   ■■  ■■  ■■  ■■  ■   ■■          ■■■    ■■             
+  ■■   ■■■■■  ■■■■■   ■    ■■■■            ■■               
+              ■                                             
+              ■                                             
+              ■                                             
+                                                            
+      ■           ■                                         
+      ■         ■■■■■■■           ■                         
+      ■         ■     ■     ■     ■                         
+  ■■■■■■■■■     ■■■■■■■     ■  ■■■■■■                       
+  ■   ■   ■     ■     ■ ■   ■     ■■                        
+  ■   ■   ■     ■■■■■■■■    ■     ■                         
+  ■   ■   ■     ■     ■■    ■     ■                         
+  ■■■■■■■■■   ■■■■■■■■■     ■■    ■                         
+  ■   ■   ■         ■ ■     ■■ ■■■■■                        
+      ■           ■■  ■     ■  ■  ■■■■                      
+      ■         ■■    ■     ■  ■■■■                         
+      ■        ■    ■■■                                     
+                                                            
+                                                            
+                                                            
+                                                            
+   ■                    ■        ■            ■            ■
+  ■                     ■        ■            ■            ■
+  ■                      ■       ■            ■            ■
+ ■  ■■   ■       ■■   ■  ■       ■            ■            ■
+ ■   ■■ ■         ■   ■  ■       ■            ■            ■
+ ■    ■■■         ■  ■   ■       ■            ■            ■
+ ■    ■■           ■ ■   ■       ■            ■            ■
+ ■    ■■■          ■■■   ■                                  
+ ■   ■  ■          ■■    ■       ■            ■            ■
+  ■ ■■   ■ ■        ■   ■■       ■            ■            ■
+  ■        ■       ■    ■                                   
+   ■      ■       ■■                                        
+*/
 
 mod operation;
 mod print;
@@ -94,22 +137,8 @@ fn main() {
                     EnemyAction::ATTACK { x, y } => {
                         table[y][x] = -1;
                         enemy_attacked_table[y][x] += 1;
-                        println!("target: {}, {}", x, y);
+                        println!("【Debug】target: {}, {}", x, y);
                         enemy_result = my_sensui.attack_response((x, y));
-                        match enemy_result {
-                            EnemyAttackResult::HIT(_) => {
-                                println!("hit");
-                            }
-                            EnemyAttackResult::DEAD(_) => {
-                                println!("dead");
-                            }
-                            EnemyAttackResult::RAGE(_) => {
-                                println!("rage");
-                            }
-                            EnemyAttackResult::NONE => {
-                                println!("none");
-                            }
-                        }
                     }
                     EnemyAction::MOVE { d, n } => match my_result {
                         AttackResult::HIT(t) => {
@@ -160,7 +189,9 @@ fn set_next(dxy_: (i32, i32), t: (usize, usize)) -> (Option<usize>, Option<usize
         }
     }
 
-    println!("next: ({}, {})", next.0.unwrap(), next.1.unwrap());
+    if next.0.is_none() && next.1.is_none() {
+        println!("【Debug】next: ({}, {})", next.0.unwrap(), next.1.unwrap());
+    }
 
     next
 }
