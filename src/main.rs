@@ -1,48 +1,3 @@
-/*
-                      ■                                     
-                      ■                 ■■■■■               
- ■                    ■                ■  ■  ■■             
-■■■■  ■   ■■  ■ ■■■   ■    ■■■■       ■   ■   ■             
- ■    ■   ■■  ■■  ■■  ■   ■■  ■      ■■   ■    ■            
- ■    ■   ■■  ■    ■  ■   ■   ■■     ■   ■     ■            
- ■    ■   ■■  ■    ■  ■   ■■■■■■     ■   ■    ■■            
- ■    ■   ■■  ■    ■  ■   ■           ■ ■     ■             
- ■■   ■■  ■■  ■■  ■■  ■   ■■          ■■■    ■■             
-  ■■   ■■■■■  ■■■■■   ■    ■■■■            ■■               
-              ■                                             
-              ■                                             
-              ■                                             
-                                                            
-      ■           ■                                         
-      ■         ■■■■■■■           ■                         
-      ■         ■     ■     ■     ■                         
-  ■■■■■■■■■     ■■■■■■■     ■  ■■■■■■                       
-  ■   ■   ■     ■     ■ ■   ■     ■■                        
-  ■   ■   ■     ■■■■■■■■    ■     ■                         
-  ■   ■   ■     ■     ■■    ■     ■                         
-  ■■■■■■■■■   ■■■■■■■■■     ■■    ■                         
-  ■   ■   ■         ■ ■     ■■ ■■■■■                        
-      ■           ■■  ■     ■  ■  ■■■■                      
-      ■         ■■    ■     ■  ■■■■                         
-      ■        ■    ■■■                                     
-                                                            
-                                                            
-                                                            
-                                                            
-   ■                    ■        ■            ■            ■
-  ■                     ■        ■            ■            ■
-  ■                      ■       ■            ■            ■
- ■  ■■   ■       ■■   ■  ■       ■            ■            ■
- ■   ■■ ■         ■   ■  ■       ■            ■            ■
- ■    ■■■         ■  ■   ■       ■            ■            ■
- ■    ■■           ■ ■   ■       ■            ■            ■
- ■    ■■■          ■■■   ■                                  
- ■   ■  ■          ■■    ■       ■            ■            ■
-  ■ ■■   ■ ■        ■   ■■       ■            ■            ■
-  ■        ■       ■    ■                                   
-   ■      ■       ■■                                        
-*/
-
 mod operation;
 mod print;
 mod sensui;
@@ -62,6 +17,7 @@ const MY_SENSUI_MAP: [&str; 5] = [
     "..#.."
 ];
 const FIRST_ATTACK: (usize, usize) = (3, 2);
+const FIRST_TURN: bool = true;
 
 fn main() {
     let mut my_sensui = SensuiMap::new(MY_SENSUI_MAP.iter().map(|s| s.chars().collect()).collect());
@@ -69,7 +25,7 @@ fn main() {
     let mut table = vec![vec![-1; 5]; 5];
     let mut enemy_attacked_table = vec![vec![0; 5]; 5];
 
-    let mut is_my_turn = true;
+    let mut is_my_turn = FIRST_TURN;
     let mut target = FIRST_ATTACK;
     let mut my_result = AttackResult::NONE;
     let mut enemy_result = EnemyAttackResult::NONE;
@@ -152,7 +108,7 @@ fn main() {
 
                             // hit したやつが移動してないことが確定したらそれはあまり意味がないのでなにもしない
                         }
-                        AttackResult::RAGE(t) => {
+                        AttackResult::RAGE(_t) => {
                             // t を中心とした9つのセルを d 方向に n 移動
                             // 意味あるかな。。
                         }
