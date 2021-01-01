@@ -116,6 +116,8 @@ fn main() {
                                 table[next.1.unwrap()][next.0.unwrap()] = INF;
                             }
 
+                            target = (next.0.unwrap(), next.1.unwrap());
+
                             // hit したやつが移動してないことが確定したらそれはあまり意味がないのでなにもしない
                         }
                         AttackResult::RAGE(_t) => {
