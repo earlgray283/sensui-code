@@ -1,5 +1,5 @@
 # sensui code
-とりあえず、main はとりあえず攻撃とか防御(?)とか、最低限のコードしか置いていません。戦略とか変えるならブランチを切っていく方針で。
+ぼくがかんがえたさいきょーの潜水艦ゲームコンピュータです。
 
 ## Requirements
 + Rust(1.48.0)
@@ -37,6 +37,12 @@ $ git pull origin main
 ## Execute
 ```console
 $ cargo run
+```
+
+## Release Build
+最高のパフォーマンスを、あなたに
+```console
+$ cargo build --release
 ```
 
 ## Explain
