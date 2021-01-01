@@ -39,7 +39,6 @@ fn main() {
                 match enemy_result {
                     // move
                     EnemyAttackResult::HIT(id) | EnemyAttackResult::RAGE(id) => {
-                        // todo
                         let next = operation::mov(id, &my_sensui, &enemy_attacked_table);
                         my_sensui
                             .move_sensui(id, next.0, next.1)
@@ -91,7 +90,18 @@ fn main() {
                 let action = get_enemy_action();
                 match action {
                     EnemyAction::ATTACK { x, y } => {
+                        // 攻撃してきた周囲 8 マスを 1 加算
+                        for i in y.checked_sub(1).unwrap_or_default()..=(y + 1).min(4) {
+                            for j in x.checked_sub(1).unwrap_or_default()..=(x + 1).min(4) {
+                                table[i][j] = if table[i][j] == -1 {
+                                    1
+                                } else {
+                                    table[i][j] + 1
+                                };
+                            }
+                        }
                         table[y][x] = -1;
+
                         enemy_attacked_table[y][x] += 1;
                         println!("【Debug】target: {}, {}", x, y);
                         enemy_result = my_sensui.attack_response((x, y));
