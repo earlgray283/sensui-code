@@ -15,7 +15,7 @@ pub enum AttackResult {
 // enemy の攻撃に対する反応
 pub enum EnemyAttackResult {
     HIT(usize),
-    RAGE(usize),
+    RAGE(Vec<usize>),
     DEAD(usize),
     NONE,
 }
@@ -198,13 +198,17 @@ impl SensuiMap {
             return EnemyAttackResult::HIT(self.id_map[&target]);
         }
 
+        let mut v = Vec::new();
         for i in target.1.checked_sub(1).unwrap_or_default()..=(target.1 + 1).min(4) {
             for j in target.0.checked_sub(1).unwrap_or_default()..=(target.0 + 1).min(4) {
                 if self.m[i][j] == '#' {
-                    println!("【Attack Response】Rage");
-                    return EnemyAttackResult::RAGE(self.id_map[&(j, i)]);
+                    v.push(self.id_map[&(j, i)]);
                 }
             }
+        }
+        if !v.is_empty() {
+            println!("【Attack Response】Rage");
+            return EnemyAttackResult::RAGE(v);
         }
 
         println!("【Attack Response】None");

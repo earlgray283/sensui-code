@@ -38,12 +38,31 @@ fn main() {
             true => {
                 match enemy_result {
                     // move
-                    EnemyAttackResult::HIT(id) | EnemyAttackResult::RAGE(id) => {
+                    EnemyAttackResult::HIT(id) => {
                         let next = operation::mov(id, &my_sensui, &enemy_attacked_table);
                         my_sensui
                             .move_sensui(id, next.0, next.1)
                             .map_err(|e| println!("{}", e))
                             .unwrap();
+                    }
+                    EnemyAttackResult::RAGE(ref ids) => {
+                        if ids.len() >= 2 {
+                            let pos = my_sensui.sensuis[ids[0]].pos;
+                            let mut max = enemy_attacked_table[pos.1][pos.0];
+                            let mut next_id = ids[0];
+                            for id in ids {
+                                let pos = my_sensui.sensuis[*id].pos;
+                                if max < enemy_attacked_table[pos.1][pos.0] {
+                                    max = enemy_attacked_table[pos.1][pos.0];
+                                    next_id = *id;
+                                }
+                            }
+                            let next = operation::mov(next_id, &my_sensui, &enemy_attacked_table);
+                            my_sensui
+                                .move_sensui(next_id, next.0, next.1)
+                                .map_err(|e| println!("{}", e))
+                                .unwrap();
+                        }
                     }
                     // attack
                     _ => {
