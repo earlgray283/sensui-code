@@ -48,44 +48,6 @@ pub struct SensuiData {
 }
 
 impl SensuiMap {
-    /*
-    pub fn new_rand() -> SensuiMap {
-        let mut m = vec![vec!['.', '.', '.', '.', '.']; 5];
-
-        let mut pos_list = Vec::new();
-        for _i in 0..5 {
-            let mut x = rand::random::<usize>() % 5;
-            let mut y = rand::random::<usize>() % 5;
-            while m[y][x] == '#' {
-                x = rand::random::<usize>() % 5;
-                y = rand::random::<usize>() % 5;
-            }
-            m[y][x] = '#';
-            pos_list.push((y, x));
-        }
-
-        let mut hp_table = vec![vec![-1, -1, -1, -1, -1]; 5];
-        for i in 0..5 {
-            for j in 0..5 {
-                if m[i][j] == '#' {
-                    hp_table[i][j] = 3;
-                }
-            }
-        }
-
-        SensuiMap {
-            m,
-            hp_table,
-            sensuis: (0..4).map(|i| SensuiData {
-                id: i,
-                hp: 3,
-                pos: pos_list[i],
-                status: AttackResult::NONE,
-            }).collect(),
-        }
-    }
-    */
-
     pub fn new(m: Vec<Vec<char>>) -> SensuiMap {
         let mut pos_list = Vec::new();
         for i in 0..5 {
@@ -190,7 +152,7 @@ impl SensuiMap {
             if self.sensuis[id].hp == 0 {
                 self.sensuis[id].status = AttackResult::DEAD(target);
                 self.id_map.remove(&target);
-                self.m[target.1][target.0] = '.';
+                self.m[target.1][target.0] = '†';
                 println!("【Attack Response】Dead");
                 return EnemyAttackResult::DEAD(id);
             }

@@ -1,5 +1,5 @@
-use sensui::{Direction, SensuiMap};
 use crate::sensui;
+use sensui::{Direction, SensuiMap};
 
 /// 索敵を主として攻撃を決定
 pub fn base_search(my_sensui: &SensuiMap, table: &Vec<Vec<i32>>) -> Option<(usize, usize)> {
@@ -7,7 +7,7 @@ pub fn base_search(my_sensui: &SensuiMap, table: &Vec<Vec<i32>>) -> Option<(usiz
     let mut list = Vec::new();
     for i in 0..5 {
         for j in 0..5 {
-            if my_sensui.m[i][j] != '#' && attackable[i][j]  {
+            if my_sensui.m[i][j] != '#' && attackable[i][j] && table[i][j] != 0 {
                 list.push((j, i)); // (x, y) なので
             }
         }
@@ -24,6 +24,7 @@ pub fn base_search(my_sensui: &SensuiMap, table: &Vec<Vec<i32>>) -> Option<(usiz
                 }
             }
         }
+
         if cnt > max {
             max = cnt;
             target = t;
@@ -58,7 +59,12 @@ pub fn base_probability(table: &Vec<Vec<i32>>) -> Option<(usize, usize)> {
 }
 
 pub fn mov(id: usize, my_sensui: &SensuiMap, table: &Vec<Vec<i32>>) -> (Direction, usize) {
-    let v = vec![Direction::EAST, Direction::WEST, Direction::NORTH, Direction::SOUTH];
+    let v = vec![
+        Direction::EAST,
+        Direction::WEST,
+        Direction::NORTH,
+        Direction::SOUTH,
+    ];
 
     let mut ans: (Direction, usize) = (Direction::NORTH, 1);
     let mut _max = -1;
@@ -69,7 +75,9 @@ pub fn mov(id: usize, my_sensui: &SensuiMap, table: &Vec<Vec<i32>>) -> (Directio
             if next.0.is_none() || next.1.is_none() {
                 continue;
             }
-            if my_sensui.m[next.1.unwrap()][next.0.unwrap()] == '#' {
+            if my_sensui.m[next.1.unwrap()][next.0.unwrap()] == '#'
+                || my_sensui.m[next.1.unwrap()][next.0.unwrap()] == '†'
+            {
                 continue;
             }
             let next = (next.0.unwrap(), next.1.unwrap());

@@ -30,7 +30,7 @@ fn main() {
     let mut my_result = AttackResult::NONE;
     let mut enemy_result = EnemyAttackResult::NONE;
 
-    loop {
+    'L1: loop {
         my_sensui.print_deco();
         table.print_deco();
 
@@ -62,6 +62,11 @@ fn main() {
                                 .move_sensui(next_id, next.0, next.1)
                                 .map_err(|e| println!("{}", e))
                                 .unwrap();
+                        } else {
+                            enemy_result = EnemyAttackResult::NONE;
+                            target = operation::base_search(&my_sensui, &table)
+                                .unwrap_or(operation::base_probability(&table).unwrap_or((0, 1)));
+                            continue 'L1;
                         }
                     }
                     // attack
@@ -95,7 +100,7 @@ fn main() {
                                         };
                                     }
                                 }
-                                table[target.1][target.0] = -1;
+                                table[target.1][target.0] = 0;
                             }
                         }
 
@@ -115,11 +120,15 @@ fn main() {
                                 table[i][j] = if table[i][j] == -1 {
                                     1
                                 } else {
-                                    table[i][j] + 1
+                                    if table[i][j] == 0 {
+                                        0
+                                    } else {
+                                        table[i][j] + 1
+                                    }
                                 };
                             }
                         }
-                        table[y][x] = -1;
+                        table[y][x] = 0;
 
                         enemy_attacked_table[y][x] += 1;
                         println!("【Debug】target: {}, {}", x, y);
@@ -131,7 +140,7 @@ fn main() {
                             let next = set_next(dxy_, t);
 
                             if !next.0.is_none() && !next.1.is_none() {
-                                table[t.1][t.0] = -1;
+                                table[t.1][t.0] = 0;
                                 table[next.1.unwrap()][next.0.unwrap()] = INF;
                             }
 
