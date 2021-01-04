@@ -140,7 +140,7 @@ impl SensuiMap {
             ));
         }
 
-        println!("【Action】attack to ({}, {})!", target.0, target.1);
+        println!("【Action】attack to ({}, {})!", (target.1 as u8 + 'A' as u8) as char, target.0 + 1);
 
         Ok(get_attack_response(target))
     }
@@ -235,19 +235,19 @@ pub fn get_enemy_action() -> EnemyAction {
             "1" => {
                 // 1 x y
                 if tokens.len() == 3 {
-                    let x = tokens[1].parse::<usize>();
-                    if let Err(e) = x {
-                        eprintln!("{}", e);
-                        continue;
-                    }
-                    let x = x.unwrap();
-
-                    let y = tokens[2].parse::<usize>();
+                    let y = tokens[1].parse::<char>();
                     if let Err(e) = y {
                         eprintln!("{}", e);
                         continue;
                     }
-                    let y = y.unwrap();
+                    let y = y.unwrap() as usize - 'A' as usize;
+
+                    let x = tokens[2].parse::<usize>();
+                    if let Err(e) = x {
+                        eprintln!("{}", e);
+                        continue;
+                    }
+                    let x = x.unwrap() - 1;
 
                     return EnemyAction::ATTACK { x, y };
                 }
