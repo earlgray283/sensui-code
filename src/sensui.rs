@@ -115,6 +115,11 @@ impl SensuiMap {
         Ok(())
     }
 
+    pub fn is_attackable(&self, pos: (usize, usize)) -> bool {
+        let atkble = self.gen_attackable();
+        atkble[pos.1][pos.0]
+    }
+
     pub fn gen_attackable(&self) -> Vec<Vec<bool>> {
         let mut attackable = vec![vec![false; 5]; 5];
         for sensui in &self.sensuis {

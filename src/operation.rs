@@ -3,11 +3,10 @@ use sensui::{Direction, SensuiMap};
 
 /// 索敵を主として攻撃を決定
 pub fn base_search(my_sensui: &SensuiMap, table: &Vec<Vec<i32>>) -> Option<(usize, usize)> {
-    let attackable = my_sensui.gen_attackable();
     let mut list = Vec::new();
     for i in 0..5 {
         for j in 0..5 {
-            if my_sensui.m[i][j] != '#' && attackable[i][j] && table[i][j] != 0 {
+            if my_sensui.m[i][j] != '#' && table[i][j] != 0 {
                 list.push((j, i)); // (x, y) なので
             }
         }
@@ -16,6 +15,9 @@ pub fn base_search(my_sensui: &SensuiMap, table: &Vec<Vec<i32>>) -> Option<(usiz
     let mut max = 0;
     let mut target = (5, 5);
     for t in list {
+        if !my_sensui.is_attackable(t) {
+            continue;
+        }
         let mut cnt = 0;
         for i in t.1.checked_sub(1).unwrap_or_default()..(t.1 + 2).min(5) {
             for j in t.0.checked_sub(1).unwrap_or_default()..(t.0 + 2).min(5) {
@@ -39,11 +41,14 @@ pub fn base_search(my_sensui: &SensuiMap, table: &Vec<Vec<i32>>) -> Option<(usiz
 }
 
 /// 確率を主として攻撃決定.
-pub fn base_probability(table: &Vec<Vec<i32>>) -> Option<(usize, usize)> {
+pub fn base_probability(sensui: &SensuiMap, table: &Vec<Vec<i32>>) -> Option<(usize, usize)> {
     let mut max = 0;
     let mut target = (5, 5);
     for i in 0..5 {
         for j in 0..5 {
+            if !sensui.is_attackable((j, i)) {
+                continue;
+            }
             if table[i][j] > max {
                 target = (j, i);
                 max = table[i][j];

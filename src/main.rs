@@ -26,7 +26,7 @@ fn main() {
     let mut enemy_attacked_table = vec![vec![0; 5]; 5];
 
     let mut is_my_turn = FIRST_TURN;
-    let mut target = FIRST_ATTACK;
+    let mut target = Some(FIRST_ATTACK);
     let mut my_result = AttackResult::NONE;
     let mut enemy_result = EnemyAttackResult::NONE;
 
@@ -64,16 +64,25 @@ fn main() {
                                 .unwrap();
                         } else {
                             enemy_result = EnemyAttackResult::NONE;
-                            target = operation::base_search(&my_sensui, &table)
-                                .unwrap_or(operation::base_probability(&table).unwrap_or((0, 1)));
+
                             continue 'L1;
                         }
                     }
                     // attack
                     _ => {
                         let mut res: Result<AttackResult, String>;
+                        let mut target_;
                         loop {
-                            res = my_sensui.attack((target.0, target.1));
+                            target_ = if target.is_none() {
+                                operation::base_search(&my_sensui, &table).unwrap_or(
+                                    operation::base_probability(&my_sensui, &table)
+                                        .unwrap_or((0, 1)),
+                                )
+                            } else {
+                                target.unwrap()
+                            };
+
+                            res = my_sensui.attack((target_.0, target_.1));
                             if let Err(e) = res {
                                 println!("{}", e);
                                 continue;
@@ -83,15 +92,15 @@ fn main() {
 
                         my_result = res.unwrap();
                         match my_result {
-                            AttackResult::HIT(_) => table[target.1][target.0] = INF,
-                            AttackResult::DEAD(_) => table[target.1][target.0] = MINF,
-                            AttackResult::NONE => table[target.1][target.0] = 0,
+                            AttackResult::HIT(_) => table[target_.1][target_.0] = INF,
+                            AttackResult::DEAD(_) => table[target_.1][target_.0] = MINF,
+                            AttackResult::NONE => table[target_.1][target_.0] = 0,
                             AttackResult::RAGE(_) => {
-                                let range_y = target.1.checked_sub(1).unwrap_or_default()
-                                    ..=(target.1 + 1).min(4);
+                                let range_y = target_.1.checked_sub(1).unwrap_or_default()
+                                    ..=(target_.1 + 1).min(4);
                                 for i in range_y {
-                                    let range_x = target.0.checked_sub(1).unwrap_or_default()
-                                        ..=(target.0 + 1).min(4);
+                                    let range_x = target_.0.checked_sub(1).unwrap_or_default()
+                                        ..=(target_.0 + 1).min(4);
                                     for j in range_x {
                                         table[i][j] = if table[i][j] == -1 {
                                             1
@@ -100,14 +109,13 @@ fn main() {
                                         };
                                     }
                                 }
-                                table[target.1][target.0] = 0;
+                                table[target_.1][target_.0] = 0;
                             }
                         }
-
-                        target = operation::base_search(&my_sensui, &table)
-                            .unwrap_or(operation::base_probability(&table).unwrap_or((0, 1)));
                     }
                 }
+
+                target = None;
             }
             false => {
                 // deffence
@@ -144,7 +152,7 @@ fn main() {
                                 table[next.1.unwrap()][next.0.unwrap()] = INF;
                             }
 
-                            target = (next.0.unwrap(), next.1.unwrap());
+                            target = Some((next.0.unwrap(), next.1.unwrap()));
 
                             // hit したやつが移動してないことが確定したらそれはあまり意味がないのでなにもしない
                         }
