@@ -17,15 +17,21 @@ const MY_SENSUI_MAP: [&str; 5] = [
     "..#.."
 ];
 const FIRST_ATTACK: (usize, usize) = (3, 2);
-const FIRST_TURN: bool = false;
 
 fn main() {
-    let mut my_sensui = SensuiMap::new(MY_SENSUI_MAP.iter().map(|s| s.chars().collect()).collect());
+    //let mut my_sensui = SensuiMap::new(MY_SENSUI_MAP.iter().map(|s| s.chars().collect()).collect());
+    let mut my_sensui = SensuiMap::new_rand();
 
     let mut table = vec![vec![-1; 5]; 5];
     let mut enemy_attacked_table = vec![vec![0; 5]; 5];
 
-    let mut is_my_turn = FIRST_TURN;
+    let args = std::env::args().collect::<Vec<String>>();
+    let mut is_my_turn = false;
+    if let Some(opt) = args.get(1) {
+        if opt == "-f" {
+            is_my_turn = true;
+        }
+    }
     let mut target = Some(FIRST_ATTACK);
     let mut my_result = AttackResult::NONE;
     let mut enemy_result = EnemyAttackResult::NONE;
@@ -82,14 +88,16 @@ fn main() {
                         let mut target_;
                         loop {
                             target_ = if target.is_none() {
-                                operation::base_probability(&my_sensui, &table)
-                                    .unwrap_or(operation::base_search(&my_sensui, &table).unwrap_or((5, 5)))
+                                operation::base_probability(&my_sensui, &table).unwrap_or(
+                                    operation::base_search(&my_sensui, &table).unwrap_or((5, 5)),
+                                )
                             } else {
                                 target.unwrap()
                             };
 
                             if target_ == (5, 5) {
-                                enemy_result = EnemyAttackResult::HIT(operation::find_min_hp(&my_sensui));
+                                enemy_result =
+                                    EnemyAttackResult::HIT(operation::find_min_hp(&my_sensui));
                                 continue 'L1;
                             }
 
@@ -99,6 +107,7 @@ fn main() {
                                 continue;
                             }
                             break;
+
                         }
 
                         my_result = res.unwrap();
