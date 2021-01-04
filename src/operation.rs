@@ -73,6 +73,9 @@ pub fn find_min_hp(my_sensui: &SensuiMap) -> usize {
     let mut min = std::usize::MAX;
     let mut ans = 0;
     for sensui in &my_sensui.sensuis {
+        if sensui.hp == 0 {
+            continue;
+        }
         if sensui.hp < min {
             min = sensui.hp;
             ans = sensui.id;

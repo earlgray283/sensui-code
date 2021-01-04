@@ -107,6 +107,10 @@ impl SensuiMap {
 
         self.m[self.sensuis[id].pos.1][self.sensuis[id].pos.0] = '.';
 
+        if self.sensuis[id].hp == 0 {
+            return Err("err".to_string())
+        }
+
         let id_ = self.id_map[&self.sensuis[id].pos];
         self.id_map
             .remove(&self.sensuis[id].pos)
