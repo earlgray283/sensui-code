@@ -74,10 +74,7 @@ fn main() {
                         let mut target_;
                         loop {
                             target_ = if target.is_none() {
-                                operation::base_search(&my_sensui, &table).unwrap_or(
-                                    operation::base_probability(&my_sensui, &table)
-                                        .unwrap_or((0, 1)),
-                                )
+                                operation::base_probability(&my_sensui, &table).unwrap()
                             } else {
                                 target.unwrap()
                             };
