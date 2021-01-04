@@ -69,6 +69,19 @@ pub fn base_probability(sensui: &SensuiMap, table: &Vec<Vec<i32>>) -> Option<(us
     None
 }
 
+pub fn find_min_hp(my_sensui: &SensuiMap) -> usize {
+    let mut min = std::usize::MAX;
+    let mut ans = 0;
+    for sensui in &my_sensui.sensuis {
+        if sensui.hp < min {
+            min = sensui.hp;
+            ans = sensui.id;
+        }
+    }
+
+    ans
+}
+
 pub fn mov(id: usize, my_sensui: &SensuiMap, table: &Vec<Vec<i32>>) -> (Direction, usize) {
     let v = vec![
         Direction::EAST,

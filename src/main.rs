@@ -39,6 +39,14 @@ fn main() {
                 match enemy_result {
                     // move
                     EnemyAttackResult::HIT(id) => {
+                        match my_result {
+                            AttackResult::HIT(pos) => {
+                                enemy_result = EnemyAttackResult::NONE;
+                                target = Some(pos);
+                                continue 'L1;
+                            }
+                            _ => {}
+                        }
                         let next = operation::mov(id, &my_sensui, &enemy_attacked_table);
                         my_sensui
                             .move_sensui(id, next.0, next.1)
@@ -75,10 +83,15 @@ fn main() {
                         loop {
                             target_ = if target.is_none() {
                                 operation::base_probability(&my_sensui, &table)
-                                    .unwrap_or(operation::base_search(&my_sensui, &table).unwrap_or((0, 0)))
+                                    .unwrap_or(operation::base_search(&my_sensui, &table).unwrap_or((5, 5)))
                             } else {
                                 target.unwrap()
                             };
+
+                            if target_ == (5, 5) {
+                                enemy_result = EnemyAttackResult::HIT(operation::find_min_hp(&my_sensui));
+                                continue 'L1;
+                            }
 
                             res = my_sensui.attack((target_.0, target_.1));
                             if let Err(e) = res {
