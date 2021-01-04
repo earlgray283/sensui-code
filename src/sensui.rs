@@ -122,14 +122,14 @@ impl SensuiMap {
 
     pub fn gen_attackable(&self) -> Vec<Vec<bool>> {
         let mut attackable = vec![vec![false; 5]; 5];
-        for sensui in &self.sensuis {
-            for i in sensui.pos.1.checked_sub(1).unwrap_or_default()..=(sensui.pos.1 + 1).min(4) {
-                for j in sensui.pos.0.checked_sub(1).unwrap_or_default()..=(sensui.pos.0 + 1).min(4)
-                {
-                    if sensui.pos.1 == i && sensui.pos.0 == j {
-                        continue;
+        for i in 0..5 {
+            for j in 0..5 {
+                if self.m[i][j] == '#' {
+                    for ii in i.checked_sub(1).unwrap()..=(i + 1).min(4) {
+                        for jj in j.checked_sub(1).unwrap()..=(j + 1).min(4) {
+                            attackable[i][j] = true;
+                        }
                     }
-                    attackable[i][j] = true;
                 }
             }
         }
@@ -145,7 +145,11 @@ impl SensuiMap {
             ));
         }
 
-        println!("【Action】attack to ({}, {})!", (target.1 as u8 + 'A' as u8) as char, target.0 + 1);
+        println!(
+            "【Action】attack to ({}, {})!",
+            (target.1 as u8 + 'A' as u8) as char,
+            target.0 + 1
+        );
 
         Ok(get_attack_response(target))
     }
@@ -157,7 +161,7 @@ impl SensuiMap {
             if self.sensuis[id].hp == 0 {
                 self.sensuis[id].status = AttackResult::DEAD(target);
                 self.id_map.remove(&target);
-                self.m[target.1][target.0] = '†';
+                self.m[target.1][target.0] = '.';
                 println!("【Attack Response】Dead");
                 return EnemyAttackResult::DEAD(id);
             }

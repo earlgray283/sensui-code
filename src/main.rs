@@ -155,7 +155,11 @@ fn main() {
                                 table[next.1.unwrap()][next.0.unwrap()] = INF;
                             }
 
-                            target = Some((next.0.unwrap(), next.1.unwrap()));
+                            target = if my_sensui.is_attackable((next.0.unwrap(), next.1.unwrap())) {
+                                Some((next.0.unwrap(), next.1.unwrap()))
+                            } else {
+                                None
+                            };
 
                             // hit したやつが移動してないことが確定したらそれはあまり意味がないのでなにもしない
                         }

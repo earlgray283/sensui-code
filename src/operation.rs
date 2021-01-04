@@ -80,9 +80,7 @@ pub fn mov(id: usize, my_sensui: &SensuiMap, table: &Vec<Vec<i32>>) -> (Directio
             if next.0.is_none() || next.1.is_none() {
                 continue;
             }
-            if my_sensui.m[next.1.unwrap()][next.0.unwrap()] == '#'
-                || my_sensui.m[next.1.unwrap()][next.0.unwrap()] == '†'
-            {
+            if my_sensui.m[next.1.unwrap()][next.0.unwrap()] == '#' {
                 continue;
             }
             let next = (next.0.unwrap(), next.1.unwrap());
