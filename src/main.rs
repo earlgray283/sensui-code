@@ -50,7 +50,7 @@ fn main() {
                         let next = operation::mov(id, &my_sensui, &enemy_attacked_table);
                         my_sensui
                             .move_sensui(id, next.0, next.1)
-                            .map_err(|e| println!("{}", e))
+                            .map_err(|e| eprintln!("{}", e))
                             .unwrap();
                     }
                     EnemyAttackResult::RAGE(ref ids) => {
@@ -68,7 +68,7 @@ fn main() {
                             let next = operation::mov(next_id, &my_sensui, &enemy_attacked_table);
                             my_sensui
                                 .move_sensui(next_id, next.0, next.1)
-                                .map_err(|e| println!("{}", e))
+                                .map_err(|e| eprintln!("{}", e))
                                 .unwrap();
                         } else {
                             enemy_result = EnemyAttackResult::NONE;
@@ -95,7 +95,7 @@ fn main() {
 
                             res = my_sensui.attack((target_.0, target_.1));
                             if let Err(e) = res {
-                                println!("{}", e);
+                                eprintln!("{}", e);
                                 continue;
                             }
                             break;
@@ -160,7 +160,7 @@ fn main() {
                         table[y][x] = 0;
 
                         enemy_attacked_table[y][x] += 1;
-                        println!("【Debug】target: {}, {}", x, y);
+                        eprintln!("【Debug】target: {}, {}", x, y);
                         enemy_result = my_sensui.attack_response((x, y));
                     }
                     EnemyAction::MOVE { d, n } => match my_result {
@@ -220,7 +220,7 @@ fn set_next(dxy_: (i32, i32), t: (usize, usize)) -> (Option<usize>, Option<usize
     }
 
     if next.0.is_none() && next.1.is_none() {
-        println!("【Debug】next: ({}, {})", next.0.unwrap(), next.1.unwrap());
+        eprintln!("【Debug】next: ({}, {})", next.0.unwrap(), next.1.unwrap());
     }
 
     next

@@ -19,27 +19,27 @@ impl<T: std::fmt::Display> Print<T> for Vec<Vec<T>> {
             v.push(buf);
         }
 
-        print!("+");
+        eprint!("+");
         for _ in 0..max {
-            print!("-");
+            eprint!("-");
         }
-        println!("+");
+        eprintln!("+");
         for s in &v {
-            print!("{}", s);
+            eprint!("{}", s);
         }
-        print!("+");
+        eprint!("+");
         for _ in 0..max {
-            print!("-");
+            eprint!("-");
         }
-        println!("+");
+        eprintln!("+");
     }
 
     fn print(&self) {
         for i in 0..5 {
             for j in 0..5 {
-                print!("{} ", self[i][j]);
+                eprint!("{} ", self[i][j]);
             }
-            println!();
+            eprintln!();
         }
     }
 }

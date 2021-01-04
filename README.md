@@ -36,7 +36,7 @@ $ git pull origin main
 
 ## Execute
 ```console
-$ cargo run
+$ cargo run >> log
 ```
 
 ## Release Build

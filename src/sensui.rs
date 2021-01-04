@@ -48,6 +48,22 @@ pub struct SensuiData {
 }
 
 impl SensuiMap {
+    pub fn new_rand() -> SensuiMap {
+        let mut v = vec![vec!['.'; 5]; 5];
+        for _ in 0..4 {
+            loop {
+                let x = rand::random::<usize>() % 5;
+                let y = rand::random::<usize>() % 5;
+                if v[y][x] != '#' {
+                    v[y][x] = '#';
+                    break;
+                }
+            }
+        }
+
+        SensuiMap::new(v)
+    }
+
     pub fn new(m: Vec<Vec<char>>) -> SensuiMap {
         let mut pos_list = Vec::new();
         for i in 0..5 {
@@ -78,7 +94,7 @@ impl SensuiMap {
         let n = n as i32;
         let dxy = direction_to_dxy(direction, n);
 
-        println!(
+        eprintln!(
             "【Action】move {} squares {}!",
             n,
             match direction {
@@ -148,7 +164,7 @@ impl SensuiMap {
             ));
         }
 
-        println!(
+        eprintln!(
             "【Action】attack to ({}, {})!",
             (target.1 as u8 + 'A' as u8) as char,
             target.0 + 1
@@ -165,10 +181,10 @@ impl SensuiMap {
                 self.sensuis[id].status = AttackResult::DEAD(target);
                 self.id_map.remove(&target);
                 self.m[target.1][target.0] = '.';
-                println!("【Attack Response】Dead");
+                eprintln!("【Attack Response】Dead");
                 return EnemyAttackResult::DEAD(id);
             }
-            println!("【Attack Response】Hit");
+            eprintln!("【Attack Response】Hit");
             return EnemyAttackResult::HIT(self.id_map[&target]);
         }
 
@@ -181,11 +197,11 @@ impl SensuiMap {
             }
         }
         if !v.is_empty() {
-            println!("【Attack Response】Rage");
+            eprintln!("【Attack Response】Rage");
             return EnemyAttackResult::RAGE(v);
         }
 
-        println!("【Attack Response】None");
+        eprintln!("【Attack Response】None");
         EnemyAttackResult::NONE
     }
 
@@ -205,26 +221,27 @@ impl SensuiMap {
             v.push(buf);
         }
 
-        print!("+");
+        eprint!("+");
         for _ in 0..max {
-            print!("-");
+            eprint!("-");
         }
-        println!("+");
+        eprintln!("+");
         for s in &v {
-            print!("{}", s);
+            eprint!("{}", s);
         }
-        print!("+");
+        eprint!("+");
         for _ in 0..max {
-            print!("-");
+            eprint!("-");
         }
-        println!("+");
+        eprintln!("+");
     }
 }
 
 fn get_attack_response(target: (usize, usize)) -> AttackResult {
     loop {
-        println!("【Prompt】input attack result: (hit / rage / dead / none) > ");
+        eprintln!("【Prompt】input attack result: (hit / rage / dead / none) > ");
         let s: String = read!();
+        println!("{}", &s);
 
         match &*s {
             "hit" => return AttackResult::HIT(target),
@@ -238,9 +255,10 @@ fn get_attack_response(target: (usize, usize)) -> AttackResult {
 
 pub fn get_enemy_action() -> EnemyAction {
     loop {
-        println!("【Prompt】input query: (1 x y / 2 d n) > ");
+        eprintln!("【Prompt】input query: (1 x y / 2 d n) > ");
 
         let s: String = read!("{}\n");
+        println!("{}", &s);
         let tokens: Vec<&str> = s.split(' ').collect();
 
         match tokens[0] {
