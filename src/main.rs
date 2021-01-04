@@ -180,6 +180,8 @@ fn main() {
                             if !next.0.is_none() && !next.1.is_none() {
                                 table[t.1][t.0] = 0;
                                 table[next.1.unwrap()][next.0.unwrap()] = INF;
+                            } else {
+                                eprintln!("【Error】enemy sensui moved out of range.");
                             }
 
                             target = if my_sensui.is_attackable((next.0.unwrap(), next.1.unwrap()))
