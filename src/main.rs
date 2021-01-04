@@ -17,7 +17,7 @@ const MY_SENSUI_MAP: [&str; 5] = [
     "..#.."
 ];
 const FIRST_ATTACK: (usize, usize) = (3, 2);
-const FIRST_TURN: bool = true;
+const FIRST_TURN: bool = false;
 
 fn main() {
     let mut my_sensui = SensuiMap::new(MY_SENSUI_MAP.iter().map(|s| s.chars().collect()).collect());
@@ -91,7 +91,13 @@ fn main() {
                         match my_result {
                             AttackResult::HIT(_) => table[target_.1][target_.0] = INF,
                             AttackResult::DEAD(_) => table[target_.1][target_.0] = MINF,
-                            AttackResult::NONE => table[target_.1][target_.0] = 0,
+                            AttackResult::NONE => {
+                                for i in target_.1.checked_sub(1).unwrap_or_default()..=(target_.1+1).min(4) {
+                                    for j in target_.0.checked_sub(1).unwrap_or_default()..=(target_.0+1).min(4) {
+                                        table[i][j] = 0;
+                                    }
+                                }
+                            }
                             AttackResult::RAGE(_) => {
                                 let range_y = target_.1.checked_sub(1).unwrap_or_default()
                                     ..=(target_.1 + 1).min(4);
