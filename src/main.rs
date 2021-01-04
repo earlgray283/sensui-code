@@ -74,7 +74,8 @@ fn main() {
                         let mut target_;
                         loop {
                             target_ = if target.is_none() {
-                                operation::base_probability(&my_sensui, &table).unwrap()
+                                operation::base_probability(&my_sensui, &table)
+                                    .unwrap_or(operation::base_search(&my_sensui, &table).unwrap_or((0, 0)))
                             } else {
                                 target.unwrap()
                             };
@@ -92,8 +93,12 @@ fn main() {
                             AttackResult::HIT(_) => table[target_.1][target_.0] = INF,
                             AttackResult::DEAD(_) => table[target_.1][target_.0] = MINF,
                             AttackResult::NONE => {
-                                for i in target_.1.checked_sub(1).unwrap_or_default()..=(target_.1+1).min(4) {
-                                    for j in target_.0.checked_sub(1).unwrap_or_default()..=(target_.0+1).min(4) {
+                                for i in target_.1.checked_sub(1).unwrap_or_default()
+                                    ..=(target_.1 + 1).min(4)
+                                {
+                                    for j in target_.0.checked_sub(1).unwrap_or_default()
+                                        ..=(target_.0 + 1).min(4)
+                                    {
                                         table[i][j] = 0;
                                     }
                                 }
@@ -155,7 +160,8 @@ fn main() {
                                 table[next.1.unwrap()][next.0.unwrap()] = INF;
                             }
 
-                            target = if my_sensui.is_attackable((next.0.unwrap(), next.1.unwrap())) {
+                            target = if my_sensui.is_attackable((next.0.unwrap(), next.1.unwrap()))
+                            {
                                 Some((next.0.unwrap(), next.1.unwrap()))
                             } else {
                                 None

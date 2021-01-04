@@ -125,9 +125,12 @@ impl SensuiMap {
         for i in 0..5 {
             for j in 0..5 {
                 if self.m[i][j] == '#' {
-                    for ii in i.checked_sub(1).unwrap()..=(i + 1).min(4) {
-                        for jj in j.checked_sub(1).unwrap()..=(j + 1).min(4) {
-                            attackable[i][j] = true;
+                    for ii in i.checked_sub(1).unwrap_or_default()..=(i + 1).min(4) {
+                        for jj in j.checked_sub(1).unwrap_or_default()..=(j + 1).min(4) {
+                            if ii == i && jj == j {
+                                continue;
+                            }
+                            attackable[ii][jj] = true;
                         }
                     }
                 }

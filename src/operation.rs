@@ -27,6 +27,7 @@ pub fn base_search(my_sensui: &SensuiMap, table: &Vec<Vec<i32>>) -> Option<(usiz
             }
         }
 
+        //dbg!(cnt, target);
         if cnt > max {
             max = cnt;
             target = t;
@@ -46,9 +47,14 @@ pub fn base_probability(sensui: &SensuiMap, table: &Vec<Vec<i32>>) -> Option<(us
     let mut target = (5, 5);
     for i in 0..5 {
         for j in 0..5 {
+            if sensui.m[i][j] == '#' {
+                continue;
+            }
             if !sensui.is_attackable((j, i)) {
                 continue;
             }
+            
+            //dbg!((j, i), &table[i][j], max, target);
             if table[i][j] > max {
                 target = (j, i);
                 max = table[i][j];
